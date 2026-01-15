@@ -13,13 +13,27 @@ const app = express();
 
 // app.use(cors());
 
-app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://blood-connect-six.vercel.app/"
-    ],
-    credentials: true,
-}));
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://blood-connect-six.vercel.app"
+];
+
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            // allow requests with no origin (like Postman, mobile apps)
+            if (!origin) return callback(null, true);
+
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            } else {
+                return callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true,
+    })
+);
+app.options("*", cors());
 
 app.use(express.json());
 
