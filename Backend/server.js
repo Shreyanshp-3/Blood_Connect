@@ -33,7 +33,8 @@ app.use(
         credentials: true,
     })
 );
-// app.options("/*", cors());
+// app.options("/*", cors());ls
+
 
 app.use(express.json());
 
