@@ -34,30 +34,23 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, token, isProfileComplete } = useAuth();
 
   const bg = useColorModeValue("white", "gray.900");
   const secondaryText = useColorModeValue("gray.500", "gray.400");
 
-
-  const{token, isProfileComplete}=useAuth();
-  useEffect(()=>{
+  useEffect(() => {
     if (token) {
-      navigate(isProfileComplete ? "/dashboard" : "/complete-profile", { replace: true 
-
-      });  
+      navigate(isProfileComplete ? "/dashboard" : "/complete-profile", {
+        replace: true
+      });
     }
-  },[token,isProfileComplete]);
+  }, [token, isProfileComplete, navigate]);
 
   const sendOtp = async () => {
-    // e.preventDefault();
     if (!phone) return;
-    console.log("API BASE URL:", import.meta.env.VITE_API_BASE_URL);
-
     setLoading(true);
     try {
-      console.log("PHONE SENT:", phone);
-
       await api.post("/auth/send-otp", { phone });
       setOtpSent(true);
     } catch (err) {
@@ -69,13 +62,10 @@ export default function Login() {
 
   const verifyOtp = async () => {
     if (!otp) return;
-
     setLoading(true);
     try {
       const res = await api.post("/auth/verify-otp", { phone, otp });
-
       login(res.data.token, res.data.isProfileComplete);
-
       if (res.data.isProfileComplete) {
         navigate("/dashboard", { replace: true });
       } else {
@@ -89,37 +79,48 @@ export default function Login() {
   };
 
   return (
-    // console.log("API BASE URL:", import.meta.env.VITE_API_BASE_URL);
-
-
     <Flex
       minH="100vh"
       bg={bg}
       position="relative"
-      overflow="hidden"
+      /* Changed overflow to auto on base to allow scrolling on small screens */
+      overflowY={{ base: "auto", lg: "hidden" }}
+      overflowX="hidden"
       fontFamily="Inter, sans-serif"
     >
       {/* Header Logo Area */}
-      <Box position="absolute" top={6} left={{ base: 6, lg: 12 }}>
+      <Box position="absolute" top={6} left={{ base: 6, lg: 12 }} zIndex={10}>
         <HStack spacing={2}>
           <Icon as={Droplet} fill="#E53E3E" color="#E53E3E" w={6} h={6} />
           <Text fontWeight="800" fontSize="xl">BloodConnect</Text>
         </HStack>
       </Box>
 
-      <Box position="absolute" top={6} right={{ base: 6, lg: 12 }}>
+      <Box position="absolute" top={6} right={{ base: 6, lg: 12 }} zIndex={10}>
         <Icon as={Settings} color="gray.400" />
       </Box>
 
       {/* Main Container */}
-      <Container maxW="7xl" h="100vh" px={{ base: 6, lg: 12 }}>
-        <Flex h="full" direction={{ base: "column", lg: "row" }} align="center" justify="space-between">
+      {/* Changed height to auto on mobile so content isn't cut off */}
+      <Container 
+        maxW="7xl" 
+        h={{ base: "auto", lg: "100vh" }} 
+        px={{ base: 6, lg: 12 }}
+        py={{ base: 24, lg: 0 }} // Add top padding on mobile
+      >
+        <Flex 
+          h="full" 
+          direction={{ base: "column", lg: "row" }} 
+          align="center" 
+          justify="space-between"
+          gap={{ base: 12, lg: 0 }} // Add gap between text and login box on mobile
+        >
 
           {/* LEFT CONTENT */}
-          <Box flex="1" maxW="lg" pt={{ base: 24, lg: 0 }}>
+          <Box flex="1" maxW="lg">
             <Heading
               as="h1"
-              size="3xl"
+              size={{ base: "2xl", lg: "3xl" }} // Smaller heading on mobile
               lineHeight="1.1"
               fontWeight="900"
               mb={6}
@@ -132,12 +133,12 @@ export default function Login() {
               at a time.
             </Heading>
 
-            <Text fontSize="lg" color={secondaryText} mb={10} lineHeight="1.6">
+            <Text fontSize={{ base: "md", lg: "lg" }} color={secondaryText} mb={10} lineHeight="1.6">
               A fast, community-driven platform to connect blood donors and
               patients during emergencies. Join the network today.
             </Text>
 
-            <Stack spacing={8}>
+            <Stack spacing={6}>
               <Feature
                 icon={HeartPulse}
                 title="Emergency Focused"
@@ -160,13 +161,14 @@ export default function Login() {
           <Box
             flex="1"
             display="flex"
-            justifyContent={{ base: "center", lg: "flex-end" }}
+            flexDirection="column" // Stack card and security badge
+            alignItems={{ base: "center", lg: "flex-end" }}
+            justifyContent="center"
             w="full"
-            mt={{ base: 12, lg: 0 }}
           >
             <Box
               bg="white"
-              p={8}
+              p={{ base: 6, md: 8 }} // Less padding on small screens
               rounded="3xl"
               shadow="2xl"
               w="full"
@@ -266,17 +268,24 @@ export default function Login() {
                 </Text>
               </Stack>
             </Box>
+
+            {/* Security Badge - Integrated into flow for mobile, Absolute for desktop */}
+            <Box 
+                mt={{ base: 8, lg: 0 }}
+                position={{ base: "relative", lg: "absolute" }} 
+                bottom={{ base: "auto", lg: 8 }} 
+                right={{ base: "auto", lg: "16%" }} 
+                textAlign="center"
+            >
+                <HStack justify="center" spacing={2} fontSize="xs" color="green.600" fontWeight="600">
+                <Icon as={Lock} size={12} />
+                <Text>Secure & Encrypted</Text>
+                </HStack>
+            </Box>
           </Box>
         </Flex>
       </Container>
 
-      {/* Footer Security Badge (Outside Grid) */}
-      <Box position="absolute" bottom={{ base: 4, lg: 8 }} right={{ base: 0, lg: "16%" }} w={{ base: "full", lg: "auto" }} textAlign="center">
-        <HStack justify="center" spacing={2} fontSize="xs" color="green.600" fontWeight="600">
-          <Icon as={Lock} size={12} />
-          <Text>Secure & Encrypted</Text>
-        </HStack>
-      </Box>
 
       {/* Background Wave Graphic */}
       <Box
@@ -284,7 +293,7 @@ export default function Login() {
         bottom={0}
         right={0}
         w="100%"
-        h="30%"
+        h={{ base: "20%", lg: "30%" }} // Reduced height on mobile
         zIndex={0}
         bgGradient="linear(to-t, red.50, transparent)"
         style={{
