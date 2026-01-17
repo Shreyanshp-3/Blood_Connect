@@ -18,6 +18,25 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "token") {
+        if (e.newValue) {
+          setToken(e.newValue);
+          const profile = localStorage.getItem("isProfileComplete");
+          setIsProfileComplete(profile === "true");
+        } else {
+          setToken(null);
+          setIsProfileComplete(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+
   const login = (jwtToken, profileStatus) => {
     localStorage.setItem("token", jwtToken);
     localStorage.setItem("isProfileComplete", profileStatus);
@@ -40,4 +59,5 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

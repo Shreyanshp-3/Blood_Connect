@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -38,6 +38,16 @@ export default function Login() {
 
   const bg = useColorModeValue("white", "gray.900");
   const secondaryText = useColorModeValue("gray.500", "gray.400");
+
+
+  const{token, isProfileComplete}=useAuth();
+  useEffect(()=>{
+    if (token) {
+      navigate(isProfileComplete ? "/dashboard" : "/complete-profile", { replace: true 
+
+      });  
+    }
+  },[token,isProfileComplete]);
 
   const sendOtp = async () => {
     // e.preventDefault();
